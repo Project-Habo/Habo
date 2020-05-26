@@ -179,3 +179,161 @@ class User
         }
     }
 }
+
+/*
+    Sanitizes and validates first name before registration
+    Arguments list:
+        - $first_name
+    Returns:
+        - $first_name
+    */
+    private function validate_first_name($first_name) {
+        $first_name = strip_tags($first_name); // Strip HTML/PHP tags
+        $first_name = str_replace(' ', '', $first_name); // Remove white spaces
+        $first_name = ucfirst(strtolower($first_name)); // Make only first letter capital
+
+        // First name should be between 2 and 25 characters long
+        if(strlen($first_name) > 25 || strlen($first_name) < 2) {
+            array_push($this->error_array, 'Your first name must be between 2 and 25 characters.');
+        } else {
+            return $first_name;
+        }
+    }
+
+    /*
+    Sanitizes and validates last name before registration
+    Arguments list:
+        - $last_name
+    Returns:
+        - $last_name
+    */
+    private function validate_last_name($last_name) {
+        $last_name = strip_tags($last_name); // Strip HTML/PHP tags
+        $last_name = str_replace(' ', '', $last_name); // Remove white spaces
+        $last_name = ucfirst(strtolower($last_name)); // Make only first letter capital
+
+        // First name should be between 2 and 25 characters long
+        if(strlen($last_name) > 25 || strlen($last_name) < 2) {
+            array_push($this->error_array, 'Your last name must be between 2 and 25 characters.');
+        } else {
+            return $last_name;
+        }
+    }
+
+    /*
+    Sanitizes and validates email address before registration
+    Arguments list:
+        - $email
+    Returns:
+        - $email
+    */
+    private function validate_email($email) {
+        $email = strip_tags($email); // Strip HTML/PHP tags
+        $email = str_replace(' ', '', $email); // Remove white spaces
+        $email = filter_var($email, FILTER_SANITIZE_EMAIL); // Remove illegal characters
+
+        if(filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            // If email address is valid
+            try {
+                // Check if email address already registered in database
+                
+                // Prepare statement
+                $stmt = $this->db_conn->conn->prepare("
+                    SELECT email
+                    FROM users
+                    WHERE email=:email
+                ");
+                // Bind parameters
+                $stmt->bindParam(':email', $email);
+                // Execute statement
+                $stmt->execute();
+
+                if($stmt->rowCount() > 0) { // Email already in database
+                    array_push($this->error_array, 'Email already in use.');
+                } else { // Email is not in database
+                    return $email;
+                }
+            } catch (PDOException $e) {
+                echo 'Connection failed: ' . $e->getMessage();
+            }
+        } else {
+            // If email is not valid
+            array_push($this->error_array, 'This is not a valid email address.');
+        }
+    }   
+
+    /*
+    Validates password before registration
+    Arguments list: 
+        - $password, $confirm_password
+    Returns:
+        - $md5(password)
+    */
+    private function validate_password($password, $confirm_password) {
+        if($password != $confirm_password) {
+            array_push($this->error_array, 'Your passwords do not match.');
+        } elseif(preg_match('/[^A-Za-z0-9]/', $password)) {
+            array_push($this->error_array, 'Your password must only contain english characters and numbers.');
+        } elseif(strlen($password) > 30 || strlen($password) < 5) {
+            array_push($this->error_array, 'Your password must be between 5 and 30 characters.');
+        } else {
+            return md5($password);
+        }
+    }
+
+    /*
+    Based on the user's first and last name assigns a unique username
+    Arguments list:
+        - $first_name
+        - $last_name
+    Returns:
+        - $username
+    */
+    private function assign_username($first_name, $last_name) {
+        $username = strtolower($first_name . '_' . $last_name);
+
+        try {
+            // Check if username already exists in database
+
+            // Prepare statement
+            $stmt = $this->db_conn->conn->prepare("
+                SELECT username
+                FROM users
+                WHERE username=:username
+            ");
+            // Bind parameters
+            $stmt->bindParam(':username', $username);
+            // Execute statement
+            $stmt->execute();
+
+            $i = 0;
+            while($stmt->rowCount() != 0) {
+                // If username exists in database keep adding $i at the end.
+                
+                $i++;
+                if (preg_match('~[0-9]+~', $username)) { // if there are numbers in username string
+				    $username = preg_replace("/[0-9]/", $i, $username); // replace the number in the end with new $i
+				}else{ // if no numbers in username string
+					$username = $username . "_" . $i; // append $i(=1) at end of string
+                }
+                
+                // Check if new username exists in database
+
+                // Prepare statement
+                // $stmt = $this->db_conn->conn->prepare("
+                //     SELECT username
+                //     FROM users
+                //     WHERE username=:username
+                // ");
+                // Bind parameters
+                $stmt->bindParam(':username', $username);
+                // Execute statement
+                $stmt->execute();
+            }
+
+            // When available username is found
+            return $username;
+        } catch (PDOException $e) {
+            echo 'Connection failed: ' . $e->getMessage();
+        }
+    }
