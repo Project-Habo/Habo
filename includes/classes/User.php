@@ -162,6 +162,32 @@ class User
             echo 'Connection failed: ' . $e->getMessage();
         }
     }
+	
+	/*
+    Fetches all rows from users table
+    Returns:
+        - $users: Array containing users table rows
+    */
+    public function fetch_all_users() {
+        $users = array();
+
+        try {
+            // Prepare statement
+            $stmt = $this->db_conn->conn->prepare("
+                SELECT *
+                FROM users
+            ");
+            // Execute statement
+            $stmt->execute();
+
+            while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { // Loop through each row
+                array_push($users, $row);
+            }
+            return $users;
+        } catch (PDOException $e) {
+            echo 'Connection failed: ' . $e->getMessage();
+        }
+    }
 
     /*
     Check if user's account is closed
@@ -178,7 +204,7 @@ class User
             return false;
         }
     }
-}
+
 
 /*
     Sanitizes and validates first name before registration
@@ -337,3 +363,25 @@ class User
             echo 'Connection failed: ' . $e->getMessage();
         }
     }
+	
+	    public function add_activity($activity_id, $user_id) {
+        try {
+            // Prepare statement
+            $stmt = $this->db_conn->conn->prepare("
+                INSERT INTO activities_log
+                VALUES ('', :activity_id, :user_id)
+            ");
+            // Bind parameters
+            $stmt->bindParam(':activity_id', $activity_id);
+            $stmt->bindParam(':user_id', $user_id);
+            // Execute statement
+            $execute_stmt = $stmt->execute();
+
+            // if($execute_stmt == true) { // If INSERT was successfull
+            //     array_push($this->error_array, 'Registration complete.');
+            // }
+        } catch (PDOException $e) {
+            echo 'Connection failed: ' . $e->getMessage();
+        }
+    }
+}
