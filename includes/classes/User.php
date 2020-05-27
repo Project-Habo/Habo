@@ -206,7 +206,7 @@ class User
     }
 
 
-/*
+    /*
     Sanitizes and validates first name before registration
     Arguments list:
         - $first_name
@@ -363,8 +363,40 @@ class User
             echo 'Connection failed: ' . $e->getMessage();
         }
     }
-	
-	    public function add_activity($activity_id, $user_id) {
+    
+    public function create_objective($objective_name, $objective_type, $objective_goal, $objective_category, $user_id) {
+        require_once($_SERVER['DOCUMENT_ROOT'] . '/habo/includes/classes/Objective.php');
+
+        // Create objective object
+        $objective_obj = new Objective($this->db_conn);
+
+        $objective_name = $objective_obj->validate_objective_name($objective_name);
+        $objective_goal = $objective_obj->validate_objective_goal($objective_goal);
+
+        try {
+            // Prepare statement
+            $stmt = $this->db_conn->conn->prepare("
+                INSERT INTO objectives
+                VALUES ('', :objective_name, :objective_type, :objective_goal, :objective_category, '0', 'no', :user_id)
+            ");
+            // Bind parameters
+            $stmt->bindParam(':objective_name', $objective_name);
+            $stmt->bindParam(':objective_type', $objective_type);
+            $stmt->bindParam(':objective_goal', $objective_goal);
+            $stmt->bindParam(':objective_category', $objective_category);
+            $stmt->bindParam(':user_id', $user_id);
+            // Execute statement
+            $execute_stmt = $stmt->execute();
+
+            // if($execute_stmt == true) { // If INSERT was successfull
+            //     array_push($this->error_array, 'Registration complete.');
+            // }
+        } catch (PDOException $e) {
+            echo 'Connection failed: ' . $e->getMessage();
+        }
+    }
+
+    public function add_activity($activity_id, $user_id) {
         try {
             // Prepare statement
             $stmt = $this->db_conn->conn->prepare("
