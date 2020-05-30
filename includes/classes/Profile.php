@@ -110,4 +110,93 @@ class Profile
             echo 'Connection failed: ' . $e->getMessage();
         }
     }
+
+    /*
+    Fetches a row from profiles table based on user's id value
+    Arguments list:
+        - $user_id
+    Returns:
+        - $profile: Array containing profiles table row
+    */
+    public function fetch_profile_by_id($user_id) {
+        try {
+            // Prepare statement
+            $stmt = $this->db_conn->conn->prepare("
+                SELECT *
+                FROM profiles
+                WHERE user_id=:user_id
+            ");
+            // Bind parameters
+            $stmt->bindParam(':user_id', $user_id);
+            // Execute statement
+            $stmt->execute();
+
+            if($stmt->rowCount() > 0) { // If SELECT was successfull
+                $profile = $stmt->fetch(PDO::FETCH_ASSOC);
+                return $profile;
+            }
+        } catch (PDOException $e) {
+            echo 'Connection failed: ' . $e->getMessage();
+        }
+    }
+
+    /*
+    Assigns a random default profile pic to a user
+    Returns:
+        - $profile_pic: Contains path to picture file
+    */
+    private function assign_default_profile_pic() {
+        $rand = rand(1, 6); // Random number between 1 and 4
+		if($rand == 1) {
+			$profile_pic = "assets/images/profile_pics/defaults/head_deep_blue.png";
+		} elseif ($rand == 2) {
+			$profile_pic = "assets/images/profile_pics/defaults/head_emerald.png";
+		} elseif ($rand == 3) {
+			$profile_pic = "assets/images/profile_pics/defaults/head_red.png";
+		} elseif ($rand == 4) {
+			$profile_pic = "assets/images/profile_pics/defaults/head_sun_flower.png";
+		} elseif ($rand == 5) {
+			$profile_pic = "assets/images/profile_pics/defaults/head_carrot.png";
+		} elseif ($rand == 5) {
+			$profile_pic = "assets/images/profile_pics/defaults/head_wisteria.png";
+        }
+        
+        return $profile_pic;
+    }
+
+    /*
+    Calculates user's age
+    Arguments list:
+        - $date_of_birth
+    Returns:
+        - $age: In years
+    */
+    private function calculate_age($date_of_birth) {
+        $from = new DateTime($date_of_birth);
+		$to = new DateTime('today');
+        $age = $from->diff($to)->y;
+        
+        return $age;
+    }
+
+    /*
+    Checks if logged in user is friend with another user
+    Arguments list:
+        - $logged_in_user
+        - $user
+    Returns:
+        - true/false
+    */
+    public function is_friend($logged_in_user_id, $logged_in_user_username, $username) {
+        $username_comma = ',' . $username . ','; // Search target
+
+        $profile = $this->fetch_profile_by_id($logged_in_user_id);
+
+        if (strstr($profile['friends_list'], $username_comma) || $logged_in_user_username == $username) {
+			return true;
+		} else {
+			return false;
+		}
+    }
 }
+?>
