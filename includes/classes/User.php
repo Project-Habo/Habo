@@ -19,7 +19,7 @@ class User
     function __construct($db_conn) {
         $this->db_conn = $db_conn;
     }
-    
+
     /* Getter Methods */
     public function get_first_name() { return $this->first_name; }
     public function get_last_name() { return $this->last_name; }
@@ -101,7 +101,7 @@ class User
         }
     }
 
-	/*
+    /*
     Fetches a row from users table based on email value
     Arguments list:
         - $email
@@ -162,8 +162,8 @@ class User
             echo 'Connection failed: ' . $e->getMessage();
         }
     }
-	
-	/*
+
+    /*
     Fetches all rows from users table
     Returns:
         - $users: Array containing users table rows
@@ -204,7 +204,6 @@ class User
             return false;
         }
     }
-
 
     /*
     Sanitizes and validates first name before registration
@@ -316,6 +315,8 @@ class User
         - $username
     */
     private function assign_username($first_name, $last_name) {
+        $first_name = strip_tags($first_name);
+        $last_name = strip_tags($last_name);
         $username = strtolower($first_name . '_' . $last_name);
 
         try {
@@ -363,7 +364,39 @@ class User
             echo 'Connection failed: ' . $e->getMessage();
         }
     }
-    
+
+    // public function add_activity($activity_id) {
+    //     require_once($_SERVER['DOCUMENT_ROOT'] . '/habo/includes/classes/Activity.php');
+
+    //     // Create activity object
+    //     $activity_obj = new Activity($this->db_conn);
+
+    //     $activity = $activity_obj->fetch_activity_by_id($activity_id);
+
+    //     return $activity;
+    // }
+
+    public function add_activity($activity_id, $user_id) {
+        try {
+            // Prepare statement
+            $stmt = $this->db_conn->conn->prepare("
+                INSERT INTO activities_log
+                VALUES ('', :activity_id, :user_id)
+            ");
+            // Bind parameters
+            $stmt->bindParam(':activity_id', $activity_id);
+            $stmt->bindParam(':user_id', $user_id);
+            // Execute statement
+            $execute_stmt = $stmt->execute();
+
+            // if($execute_stmt == true) { // If INSERT was successfull
+            //     array_push($this->error_array, 'Registration complete.');
+            // }
+        } catch (PDOException $e) {
+            echo 'Connection failed: ' . $e->getMessage();
+        }
+    }
+
     public function create_objective($objective_name, $objective_type, $objective_goal, $objective_category, $user_id) {
         require_once($_SERVER['DOCUMENT_ROOT'] . '/habo/includes/classes/Objective.php');
 
@@ -396,16 +429,25 @@ class User
         }
     }
 
-    public function add_activity($activity_id, $user_id) {
+    public function create_group($group_name, $group_type, $username) {
+        require_once($_SERVER['DOCUMENT_ROOT'] . '/habo/includes/classes/Group.php');
+
+        // Create group object
+        $group_obj = new Group($this->db_conn);
+
+        $group_name = $group_obj->validate_group_name($group_name);
+
         try {
             // Prepare statement
             $stmt = $this->db_conn->conn->prepare("
-                INSERT INTO activities_log
-                VALUES ('', :activity_id, :user_id)
+                INSERT INTO groups
+                VALUES ('', :group_name, :group_type, :username)
             ");
             // Bind parameters
-            $stmt->bindParam(':activity_id', $activity_id);
-            $stmt->bindParam(':user_id', $user_id);
+            $stmt->bindParam(':group_name', $group_name);
+            $stmt->bindParam(':group_type', $group_type);
+            $stmt->bindParam(':username', $username);
+
             // Execute statement
             $execute_stmt = $stmt->execute();
 
@@ -417,3 +459,4 @@ class User
         }
     }
 }
+?>
