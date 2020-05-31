@@ -24,4 +24,11 @@
   * login.php
   * profile.php
   * register.php
+  
+4. Κατεβάστε το SQL αρχείο `habo.sql`.
+5. Ξεκινήστε το πρόγραμμα XAMPP και επιλέξτε "Start" στις επιλογές **Apache** και **MySQL**.
+6. Πληκτρολογείστε στον browser τη διεύθυνση `localhost/phpmyadmin`.
+7. Απο την αριστερή στήλη δημιουργήστε μια νέα βάση δεδομένων και κάντε "Import" το SQL αρχείο που κατεβάσατε στο βήμα 4.
+8. Πληκτρολογείστε στον browser τη διεύθυνση `localhost/habo/login.php`.
+9. Καντε login με email: `test10@email.com` και password: `12345`
 
