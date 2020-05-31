@@ -11,13 +11,11 @@
 Στο σημείο αυτό ο φάκελος `habo` θα πρέπει να έχει την παρακάτω δομή.
 * habo
   * *assets*
-    * ...
   * *config*
-   * ...
   * *includes*
-   * *classes*
-   * *form_handlers*
-   * *handlers*
+    * *classes*
+    * *form_handlers*
+    * *handlers*
   * .htaccess
   * admin_test.php
   * database.sql
