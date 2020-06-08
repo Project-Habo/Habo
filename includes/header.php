@@ -7,6 +7,8 @@ if(isset($_SESSION['email']) && isset($_SESSION['username'])) { // User is logge
     // Fetch user's info from users table
     $user_obj = new User($db_conn); // Create new user object
     $user = $user_obj->fetch_user_by_email($_SESSION['email']);// Stores user record info
+    $logged_in_user_id = $user['id'];
+    $logged_in_user_username = $user['username'];
     
     // Fetch user's info from profiles table
     $profile_obj = new Profile($db_conn); // Create new profile object
@@ -59,10 +61,10 @@ if(isset($_SESSION['email']) && isset($_SESSION['username'])) { // User is logge
                         <a class="nav-link top-navigation-link" href="<?php echo $user['username']; ?>" style="border-right: none;">&nbsp;<img class="rounded-circle" width="25px" height="25px" src="<?php echo $profile['profile_pic']; ?>">&nbsp;<?php echo $user['first_name']; ?></a>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <a class="nav-link active top-navigation-link" href="#" style="border-left: 1px solid #95a5a6;">Home</a>
+                        <a class="nav-link active top-navigation-link" href="index.php" style="border-left: 1px solid #95a5a6;">Home</a>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <a class="nav-link top-navigation-link" href="#">Groups</a>
+                        <a class="nav-link top-navigation-link" href="groups_test.php">Groups</a>
                     </li>
                     <!-- Notifications dropdown -->
                     <li class="nav-item" role="presentation" style="margin-left: 8px;">
